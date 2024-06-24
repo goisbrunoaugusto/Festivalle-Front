@@ -13,10 +13,19 @@ class MyDateField extends StatefulWidget {
 class _MyDateFieldState extends State<MyDateField> {
   Future<void> _selectDate() async {
     DateTime? picked = await showDatePicker(
-        context: context, firstDate: DateTime.now(), lastDate: DateTime(20100));
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(20100),
+    );
+    String formattedDate = picked.toString().split(" ")[0];
+
+    TimeOfDay? tempo =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    String formattedTime = tempo.toString().replaceAll(RegExp(r'[^0-9:]'), '');
+
     if (picked != null) {
       setState(() {
-        widget.controller.text = picked.toString().split(" ")[0];
+        widget.controller.text = "${formattedDate}T$formattedTime:00";
       });
     }
   }

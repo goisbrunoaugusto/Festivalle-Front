@@ -2,54 +2,44 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:projeto_eventos/components/my_alert_dialog.dart';
 import 'package:projeto_eventos/components/my_button.dart';
-import 'package:projeto_eventos/components/my_date_field.dart';
-import 'package:projeto_eventos/components/my_multiline_text_field.dart';
 import 'package:projeto_eventos/components/my_textfield.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto_eventos/pages/home_page.dart';
 
-class EventCreation extends StatefulWidget {
+class EstabelecimentoCreationPage extends StatefulWidget {
   final String token;
 
-  const EventCreation({super.key, required this.token});
+  const EstabelecimentoCreationPage({super.key, required this.token});
 
   @override
-  State<EventCreation> createState() => _EventCreationState();
+  State<EstabelecimentoCreationPage> createState() =>
+      _EstabelecimentoCreationPageState();
 }
 
-class _EventCreationState extends State<EventCreation> {
-  final nameController = TextEditingController();
-  final eventDateStartController = TextEditingController();
-  final eventDateEndController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final ticketQuantityController = TextEditingController();
-  final ticketPriceController = TextEditingController();
-  final sportController = TextEditingController();
+class _EstabelecimentoCreationPageState
+    extends State<EstabelecimentoCreationPage> {
   final cnpjController = TextEditingController();
+  final nameController = TextEditingController();
+  final bairroController = TextEditingController();
+  final ruaController = TextEditingController();
+  final cepController = TextEditingController();
+  final numeroController = TextEditingController();
 
-  Future<void> registerEventJson(
-      String name,
-      String eventDateStart,
-      double ticketQuantity,
-      double ticketPrice,
-      String description,
-      String cnpj,
-      String eventDateEnd,
-      BuildContext context) async {
-    var url =
-        Uri.parse("http://10.0.2.2:8080/eventos?estabelecimentoCnpj=$cnpj");
+  Future<void> registerEventJson(String cnpj, String name, String bairro,
+      String rua, String cep, String numero, BuildContext context) async {
+    var url = Uri.parse("http://10.0.2.2:8080/estabelecimentos");
     var response = await http.post(url,
         headers: <String, String>{
           'Authorization': "Bearer ${widget.token}",
           "Content-Type": "application/json"
         },
         body: jsonEncode(<String, dynamic>{
-          "title": name,
-          "startDateTime": eventDateStart,
-          "endDateTime": eventDateEnd,
-          "description": description,
-          "qtyIngressos": ticketQuantity,
-          "ingressoPrice": ticketPrice,
+          "name": name,
+          "cnpj": cnpj,
+          "addressBairro": bairro,
+          "addressRua": rua,
+          "addressCep": cep,
+          "addressNumero": numero,
         }));
     if (response.statusCode == 201) {
       showDialog(
@@ -58,7 +48,7 @@ class _EventCreationState extends State<EventCreation> {
         builder: (BuildContext context) {
           return MyAlertDialog(
             title: 'Sucesso!',
-            content: "Registro de evento realizado com sucesso!",
+            content: "Registro de estabelecimento realizado com sucesso!",
             actions: <Widget>[
               TextButton(
                   onPressed: () {
@@ -95,16 +85,13 @@ class _EventCreationState extends State<EventCreation> {
   }
 
   void registerEvent() {
-    double doubleTicketPrice = double.parse(ticketPriceController.text);
-    double doubleTicketQuantity = double.parse(ticketQuantityController.text);
     registerEventJson(
-        nameController.text,
-        eventDateStartController.text,
-        doubleTicketQuantity,
-        doubleTicketPrice,
-        descriptionController.text,
         cnpjController.text,
-        eventDateEndController.text,
+        nameController.text,
+        bairroController.text,
+        ruaController.text,
+        cepController.text,
+        numeroController.text,
         context);
   }
 
@@ -136,7 +123,7 @@ class _EventCreationState extends State<EventCreation> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 MyTextField(
-                  hintText: 'Digite o nome do evento',
+                  hintText: 'Digite o nome do estabelecimento',
                   obscuredText: false,
                   controller: nameController,
                 ),
@@ -145,27 +132,25 @@ class _EventCreationState extends State<EventCreation> {
                   obscuredText: false,
                   controller: cnpjController,
                 ),
-                MyDateField(
-                  hintText: 'Digite a data de começo do evento',
-                  controller: eventDateStartController,
-                ),
-                MyDateField(
-                  hintText: 'Digite a data de fim do evento',
-                  controller: eventDateEndController,
+                MyTextField(
+                  hintText: 'Digite a rua',
+                  obscuredText: false,
+                  controller: ruaController,
                 ),
                 MyTextField(
-                  hintText: 'Digite a quantidade de ingressos disponiveis',
+                  hintText: 'Digite o bairro',
                   obscuredText: false,
-                  controller: ticketQuantityController,
+                  controller: bairroController,
                 ),
                 MyTextField(
-                  hintText: 'Digite o preco do ingresso',
+                  hintText: 'Digite o CEP',
                   obscuredText: false,
-                  controller: ticketPriceController,
+                  controller: cepController,
                 ),
-                MyMultilineTextField(
-                  hintText: 'Digite a descricao do evento',
-                  controller: descriptionController,
+                MyTextField(
+                  hintText: 'Digite o numero da casa',
+                  obscuredText: false,
+                  controller: numeroController,
                 ),
                 MyButton(buttonText: 'Register', buttonFunction: registerEvent),
               ],

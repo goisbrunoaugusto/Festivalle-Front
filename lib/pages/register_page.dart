@@ -2,13 +2,11 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:multi_dropdown/multiselect_dropdown.dart';
 import 'package:projeto_eventos/components/my_alert_dialog.dart';
 import 'package:projeto_eventos/components/my_button.dart';
-import 'package:projeto_eventos/model/user_model.dart';
+import 'package:projeto_eventos/components/my_multiline_text_field.dart';
 import '../components/my_textfield.dart';
 import 'package:http/http.dart' as http;
-import 'package:projeto_eventos/components/my_multi_selection_box.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -17,20 +15,32 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-Future<UserModel?> registerUserJson(String name, String password, String email,
-    List roles, String phone, String cpf, BuildContext context) async {
-  var url = Uri.parse("http://10.0.2.2:8080/auth/signup");
+List<String> list = <String>['festeiro', 'organizador', 'vendedor'];
+
+Future<void> registerUserJson(
+    String name,
+    String password,
+    String email,
+    String role,
+    String phone,
+    String cpf,
+    String vendedorDescription,
+    String organizadorCargo,
+    BuildContext context) async {
+  var url = Uri.parse("http://10.0.2.2:8080/user");
   var response = await http.post(url,
       headers: <String, String>{"Content-Type": "application/json"},
       body: jsonEncode(<String, Object>{
-        "username": name,
+        "name": name,
         "password": password,
         "email": email,
         "cpf": cpf,
-        "phone": phone ?? "",
-        "roles": roles,
+        "phone": phone,
+        "type": role,
+        "vendedorDescription": vendedorDescription ?? "",
+        "organizadorCargo": organizadorCargo ?? ""
       }));
-  if (response.statusCode == 200) {
+  if (response.statusCode == 201) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -76,24 +86,20 @@ class _RegisterPageState extends State<RegisterPage> {
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
   final cpfController = TextEditingController();
-  final roleController = TextEditingController();
-  final List<String> roles = [""];
-  final multiSelectionBoxController = MultiSelectController();
+  final vendedorController = TextEditingController();
+  final organizadorController = TextEditingController();
+  String dropdownValue = list.first;
 
   void registerUser() {
-    List<dynamic> roles = multiSelectionBoxController.selectedOptions;
-    List roles2 = [];
-    roles.forEach((element) {
-      roles2.add(element.value);
-    });
-
     registerUserJson(
         usernameController.text,
         passwordController.text,
         emailController.text,
-        roles2,
+        dropdownValue,
         phoneController.text,
         cpfController.text,
+        vendedorController.text,
+        organizadorController.text,
         context);
   }
 
@@ -128,11 +134,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: phoneController,
               ),
               MyTextField(
-                hintText: 'Digite seu endereco',
-                obscuredText: false,
-                controller: addressController,
-              ),
-              MyTextField(
                 hintText: 'Digite seu cpf',
                 obscuredText: false,
                 controller: cpfController,
@@ -140,20 +141,41 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(
                 height: 25,
               ),
-              MyMultiSelectionBox(
-                  controller: multiSelectionBoxController,
-                  items: const <String, String>{
-                    'Usuario': 'ROLE_USER',
-                    'Organizador': 'ROLE_ORGANIZER'
-                  }),
-              // MyTextField(
-              //   hintText: 'Digite sua role',
-              //   obscuredText: false,
-              //   controller: roleController,
-              // ),
+              DropdownButton<String>(
+                hint: const Text("Selecione uma função"),
+                value: dropdownValue,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    dropdownValue = newValue!;
+                  });
+                },
+                items: list.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
               const SizedBox(
                 height: 50,
               ),
+              if (dropdownValue == 'vendedor') ...[
+                MyMultilineTextField(
+                    hintText: "Digite a descrição do vendedor",
+                    controller: vendedorController),
+                const SizedBox(
+                  height: 50,
+                ),
+              ],
+              if (dropdownValue == 'organizador') ...[
+                MyTextField(
+                    hintText: "Digite a descrição do organizador",
+                    obscuredText: false,
+                    controller: organizadorController),
+                const SizedBox(
+                  height: 50,
+                ),
+              ],
               MyButton(buttonText: 'Register', buttonFunction: registerUser),
             ]),
           ),

@@ -3,53 +3,42 @@ import 'package:flutter/material.dart';
 import 'package:projeto_eventos/components/my_alert_dialog.dart';
 import 'package:projeto_eventos/components/my_button.dart';
 import 'package:projeto_eventos/components/my_date_field.dart';
-import 'package:projeto_eventos/components/my_multiline_text_field.dart';
 import 'package:projeto_eventos/components/my_textfield.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto_eventos/pages/home_page.dart';
 
-class EventCreation extends StatefulWidget {
+class NoticiaCreationPage extends StatefulWidget {
   final String token;
 
-  const EventCreation({super.key, required this.token});
+  final int eventID;
+
+  const NoticiaCreationPage(
+      {super.key, required this.token, required this.eventID});
 
   @override
-  State<EventCreation> createState() => _EventCreationState();
+  State<NoticiaCreationPage> createState() => _NoticiaCreationPageState();
 }
 
-class _EventCreationState extends State<EventCreation> {
-  final nameController = TextEditingController();
-  final eventDateStartController = TextEditingController();
-  final eventDateEndController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final ticketQuantityController = TextEditingController();
-  final ticketPriceController = TextEditingController();
-  final sportController = TextEditingController();
-  final cnpjController = TextEditingController();
+class _NoticiaCreationPageState extends State<NoticiaCreationPage> {
+  final titleController = TextEditingController();
+  final textController = TextEditingController();
+  final dateController = TextEditingController();
 
-  Future<void> registerEventJson(
-      String name,
-      String eventDateStart,
-      double ticketQuantity,
-      double ticketPrice,
-      String description,
-      String cnpj,
-      String eventDateEnd,
+  Future<void> registerEventJson(String title, String text, String data, int id,
       BuildContext context) async {
     var url =
-        Uri.parse("http://10.0.2.2:8080/eventos?estabelecimentoCnpj=$cnpj");
+        Uri.parse("http://10.0.2.2:8080/noticias?eventoId=${widget.eventID}");
     var response = await http.post(url,
         headers: <String, String>{
           'Authorization': "Bearer ${widget.token}",
           "Content-Type": "application/json"
         },
         body: jsonEncode(<String, dynamic>{
-          "title": name,
-          "startDateTime": eventDateStart,
-          "endDateTime": eventDateEnd,
-          "description": description,
-          "qtyIngressos": ticketQuantity,
-          "ingressoPrice": ticketPrice,
+          "title": title,
+          "date": data,
+          "text": text,
+          "midiaPath": "string",
+          "eventoId": id,
         }));
     if (response.statusCode == 201) {
       showDialog(
@@ -58,7 +47,7 @@ class _EventCreationState extends State<EventCreation> {
         builder: (BuildContext context) {
           return MyAlertDialog(
             title: 'Sucesso!',
-            content: "Registro de evento realizado com sucesso!",
+            content: "Noticia de estabelecimento realizado com sucesso!",
             actions: <Widget>[
               TextButton(
                   onPressed: () {
@@ -80,7 +69,7 @@ class _EventCreationState extends State<EventCreation> {
         builder: (BuildContext context) {
           return MyAlertDialog(
             title: 'Ops!',
-            content: "Nao foi possivel realizar seu registro.",
+            content: "Somente organizadores podem registrar noticias.",
             actions: <Widget>[
               TextButton(
                   onPressed: () {
@@ -95,17 +84,8 @@ class _EventCreationState extends State<EventCreation> {
   }
 
   void registerEvent() {
-    double doubleTicketPrice = double.parse(ticketPriceController.text);
-    double doubleTicketQuantity = double.parse(ticketQuantityController.text);
-    registerEventJson(
-        nameController.text,
-        eventDateStartController.text,
-        doubleTicketQuantity,
-        doubleTicketPrice,
-        descriptionController.text,
-        cnpjController.text,
-        eventDateEndController.text,
-        context);
+    registerEventJson(titleController.text, textController.text,
+        dateController.text, widget.eventID, context);
   }
 
   @override
@@ -136,36 +116,18 @@ class _EventCreationState extends State<EventCreation> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 MyTextField(
-                  hintText: 'Digite o nome do evento',
+                  hintText: 'Digite o titulo da noticia',
                   obscuredText: false,
-                  controller: nameController,
-                ),
-                MyTextField(
-                  hintText: 'Digite o cnpj da empresa',
-                  obscuredText: false,
-                  controller: cnpjController,
+                  controller: titleController,
                 ),
                 MyDateField(
                   hintText: 'Digite a data de começo do evento',
-                  controller: eventDateStartController,
-                ),
-                MyDateField(
-                  hintText: 'Digite a data de fim do evento',
-                  controller: eventDateEndController,
+                  controller: dateController,
                 ),
                 MyTextField(
-                  hintText: 'Digite a quantidade de ingressos disponiveis',
+                  hintText: 'Digite a noticia',
                   obscuredText: false,
-                  controller: ticketQuantityController,
-                ),
-                MyTextField(
-                  hintText: 'Digite o preco do ingresso',
-                  obscuredText: false,
-                  controller: ticketPriceController,
-                ),
-                MyMultilineTextField(
-                  hintText: 'Digite a descricao do evento',
-                  controller: descriptionController,
+                  controller: textController,
                 ),
                 MyButton(buttonText: 'Register', buttonFunction: registerEvent),
               ],

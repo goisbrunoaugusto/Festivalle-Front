@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto_eventos/components/my_alert_dialog.dart';
-import 'package:projeto_eventos/model/user_model.dart';
 import 'package:projeto_eventos/components/my_textfield.dart';
 import 'package:projeto_eventos/components/my_button.dart';
 import 'package:projeto_eventos/pages/home_page.dart';
@@ -25,13 +24,12 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final usernameController = TextEditingController();
 
-  Future<UserRequestModel?> loginUserJson(
-      String username, String password) async {
-    var url = Uri.parse("http://10.0.2.2:8080/auth/login");
+  Future<void> loginUserJson(String username, String password) async {
+    var url = Uri.parse("http://10.0.2.2:8080/user/login");
     var response = await http.post(url,
         headers: <String, String>{"Content-Type": "application/json"},
         body: jsonEncode(<String, dynamic>{
-          "username": username,
+          "email": username,
           "password": password,
         }));
     if (response.statusCode == 200) {

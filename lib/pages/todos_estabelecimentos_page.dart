@@ -1,36 +1,34 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:projeto_eventos/components/my_event_tile.dart';
+import 'package:projeto_eventos/components/my_estabelecimento_tile.dart';
 import 'package:http/http.dart' as http;
 import 'package:projeto_eventos/components/my_navigation_bar.dart';
 import 'package:projeto_eventos/pages/estabelecimento_create_page.dart';
-import 'package:projeto_eventos/pages/event_page.dart';
-import 'package:projeto_eventos/pages/todos_estabelecimentos_page.dart';
 
-class HomePage extends StatefulWidget {
+class TodosEstabelecimentosPage extends StatefulWidget {
   final String token;
-  const HomePage({super.key, required this.token});
+  const TodosEstabelecimentosPage({super.key, required this.token});
 
   @override
-  State<HomePage> createState() {
-    return _HomePageState();
+  State<TodosEstabelecimentosPage> createState() {
+    return _TodosEstabelecimentosPageState();
   }
 }
 
-class _HomePageState extends State<HomePage> {
-  List<dynamic> events = [];
+class _TodosEstabelecimentosPageState extends State<TodosEstabelecimentosPage> {
+  List<dynamic> estabelecimentos = [];
 
   Future<void> fetchSportEvents() async {
-    final response = await http.get(Uri.parse("http://10.0.2.2:8080/eventos"),
+    final response = await http.get(
+        Uri.parse("http://10.0.2.2:8080/estabelecimentos"),
         headers: <String, String>{
           'Authorization': "Bearer ${widget.token}",
         });
     if (response.statusCode == 200) {
       List<dynamic> responseJson = json.decode(response.body);
       setState(() {
-        events = responseJson;
+        estabelecimentos = responseJson;
       });
     } else {
       throw Exception('Error fetching events');
@@ -105,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              TodosEstabelecimentosPage(token: widget.token),
+                              EstabelecimentoCreationPage(token: widget.token),
                         ),
                       );
                     },
@@ -117,11 +115,10 @@ class _HomePageState extends State<HomePage> {
         ),
         appBar: AppBar(
           centerTitle: true,
-          automaticallyImplyLeading: false,
           backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
           title: const Center(
               child: Text(
-            'Eventos',
+            'Estabelecimentos',
             style: TextStyle(color: Colors.white),
           )),
           actions: <Widget>[
@@ -142,29 +139,16 @@ class _HomePageState extends State<HomePage> {
           child: GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, crossAxisSpacing: 8, mainAxisSpacing: 8),
-            itemCount: events.length,
+            itemCount: estabelecimentos.length,
             padding: const EdgeInsets.all(8),
             itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                child: MyEventTile(
-                  title: events[index]['title'],
-                  description: events[index]['description'],
-                ),
-                onTap: () => {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EventPage(
-                                token: widget.token,
-                                eventID: events[index]['id'],
-                                title: events[index]['title'],
-                                description: events[index]['description'],
-                                ingressoPrice: events[index]['ingressoPrice'],
-                                startDateTime: events[index]['startDateTime'],
-                                endDateTime: events[index]['endDateTime'],
-                                qtyIngressos: events[index]['qtyIngressos'],
-                              )))
-                },
+              return MyEstabelecimentoTile(
+                name: estabelecimentos[index]['name'],
+                cnpj: estabelecimentos[index]['cnpj'],
+                addressBairro: estabelecimentos[index]['addressBairro'],
+                addressRua: estabelecimentos[index]['addressRua'],
+                addressCep: estabelecimentos[index]['addressCep'],
+                addressNumero: estabelecimentos[index]['addressNumero'],
               );
             },
           ),

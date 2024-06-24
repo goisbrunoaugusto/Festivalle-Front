@@ -1,44 +1,51 @@
 // ignore_for_file: use_build_context_synchronously
 
+import "dart:convert";
+
 import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
 import "package:jwt_decoder/jwt_decoder.dart";
 import "package:projeto_eventos/components/my_alert_dialog.dart";
 import "package:projeto_eventos/components/my_navigation_bar.dart";
 import "package:projeto_eventos/components/my_button.dart";
 import "package:http/http.dart" as http;
+import "package:projeto_eventos/model/news_model.dart";
 import "package:projeto_eventos/pages/attraction_create_page.dart";
+import "package:projeto_eventos/pages/noticia_create_page.dart";
 import "package:projeto_eventos/pages/reward_creation_page.dart";
 import "package:projeto_eventos/pages/reward_list_page.dart";
 
 class EventPage extends StatefulWidget {
   final String token;
-  final String name;
+  final String title;
   final String description;
-  final double ticketPrice;
-  final String createdOn;
-  final String eventDate;
-  final String location;
+  final double ingressoPrice;
+  final String startDateTime;
+  final String endDateTime;
+  final int qtyIngressos;
   final int eventID;
 
   const EventPage(
       {super.key,
       required this.token,
-      required this.name,
+      required this.title,
       required this.description,
-      required this.ticketPrice,
-      required this.createdOn,
-      required this.eventDate,
-      required this.location,
-      required this.eventID});
+      required this.ingressoPrice,
+      required this.startDateTime,
+      required this.endDateTime,
+      required this.eventID,
+      required this.qtyIngressos});
 
   @override
   State<EventPage> createState() => _EventPageState();
 }
 
 class _EventPageState extends State<EventPage> {
+  List<dynamic> news = [];
+
   Future<void> buyTicket() async {
-    var url =
-        Uri.parse("http://10.0.2.2:8080/tickets/purchase/${widget.eventID}");
+    var url = Uri.parse(
+        "http://10.0.2.2:8080/ingressos/comprar?eventoId=${widget.eventID}");
     var response = await http.post(
       url,
       headers: <String, String>{"Authorization": "Bearer ${widget.token}"},
@@ -60,13 +67,13 @@ class _EventPageState extends State<EventPage> {
             );
           });
     }
-    if (response.statusCode == 500) {
+    if (response.statusCode != 201) {
       showDialog(
           context: context,
           builder: (BuildContext context) {
             return MyAlertDialog(
               title: 'Ops!',
-              content: "Usuário já tem o ingresso!",
+              content: "Houve um erro ao comprar ingresso!",
               actions: <Widget>[
                 TextButton(
                     onPressed: () {
@@ -79,74 +86,27 @@ class _EventPageState extends State<EventPage> {
     }
   }
 
-  Future<void> confirmAttendance() async {
-    Map<String, dynamic> decodedToken;
-    int userID;
-
-    decodedToken = getID();
-    userID = decodedToken['userId'];
-    var url = Uri.parse(
-        "http://10.0.2.2:8080/tickets/confirmAttendance/${widget.eventID}/$userID");
-    var response = await http.post(
-      url,
-      headers: <String, String>{"Authorization": "Bearer ${widget.token}"},
-    );
-    if (response.statusCode == 200) {
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return MyAlertDialog(
-              title: 'Sucesso!',
-              content: "Presença confirmada com sucesso!",
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Ok"))
-              ],
-            );
-          });
-    }
-    if (response.statusCode == 400) {
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return MyAlertDialog(
-              title: 'Ops!',
-              content: "Usuário já confirmado!",
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Ok"))
-              ],
-            );
-          });
-    }
-    if (response.statusCode == 500) {
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return MyAlertDialog(
-              title: 'Ops!',
-              content: "Usuário ainda não comprou o ticket!",
-              actions: <Widget>[
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Ok"))
-              ],
-            );
-          });
+  Future<void> fetchNews() async {
+    final response = await http.get(
+        Uri.parse("http://10.0.2.2:8080/noticias/evento/${widget.eventID}"),
+        headers: <String, String>{
+          'Authorization': "Bearer ${widget.token}",
+        });
+    if (response.statusCode == 200 && response.body.isNotEmpty) {
+      print(response.body);
+      List<dynamic> responseJson = json.decode(response.body);
+      setState(() {
+        news = responseJson;
+      });
+    } else if (response.statusCode == 500) {
+      throw Exception('Error fetching events');
     }
   }
 
-  getID() {
-    Map<String, dynamic> decodedToken = JwtDecoder.decode(widget.token);
-    return decodedToken;
+  @override
+  void initState() {
+    super.initState();
+    fetchNews();
   }
 
   @override
@@ -172,7 +132,7 @@ class _EventPageState extends State<EventPage> {
                         width: 15,
                       ),
                       Text(
-                        "Adicionar Recompensa",
+                        "Criar Noticia",
                         style: TextStyle(fontSize: 20, color: Colors.white),
                       )
                     ],
@@ -181,7 +141,7 @@ class _EventPageState extends State<EventPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RewardCreationPage(
+                        builder: (context) => NoticiaCreationPage(
                             token: widget.token, eventID: widget.eventID),
                       ),
                     );
@@ -275,7 +235,7 @@ class _EventPageState extends State<EventPage> {
             ),
             Center(
               child: Text(
-                widget.name,
+                widget.title,
                 style: const TextStyle(fontSize: 40, color: Colors.white),
               ),
             ),
@@ -296,7 +256,7 @@ class _EventPageState extends State<EventPage> {
                   width: 15,
                 ),
                 Text(
-                  widget.eventDate,
+                  "Data de inicio: ${widget.startDateTime}",
                   style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
               ],
@@ -311,20 +271,105 @@ class _EventPageState extends State<EventPage> {
                   width: 45,
                 ),
                 const Icon(
-                  Icons.location_on,
+                  Icons.calendar_month,
                   color: Colors.white,
                 ),
                 const SizedBox(
                   width: 15,
                 ),
                 Text(
-                  widget.location,
+                  "Data de fim: ${widget.endDateTime}",
                   style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
               ],
             ),
             const SizedBox(
-              height: 150,
+              height: 50,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                const SizedBox(
+                  width: 45,
+                ),
+                const Icon(
+                  Icons.attach_money_rounded,
+                  color: Colors.white,
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                Text(
+                  "Preço: ${widget.ingressoPrice}",
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 50,
+            ),
+            const Row(
+              children: [
+                SizedBox(
+                  width: 30,
+                ),
+                Text(
+                  "Noticias",
+                  style: TextStyle(color: Colors.white, fontSize: 25),
+                ),
+              ],
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: news.length,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 45,
+                          ),
+                          const Icon(
+                            Icons.article,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          Text(
+                            news[index]["title"],
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 50,
+                      ),
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 45,
+                          ),
+                          const Icon(
+                            Icons.article,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(
+                            width: 15,
+                          ),
+                          Text(
+                            news[index]["text"],
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
             const Row(
               children: [
@@ -358,9 +403,6 @@ class _EventPageState extends State<EventPage> {
             const SizedBox(
               height: 15,
             ),
-            MyButton(
-                buttonText: 'Confirmar Presença',
-                buttonFunction: confirmAttendance)
           ],
         ),
       ),
