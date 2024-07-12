@@ -9,15 +9,11 @@ class MyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-        style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Colors.blue),
-            minimumSize: const MaterialStatePropertyAll(Size(300, 40))),
+    return ElevatedButton(
         onPressed: () {
           buttonFunction();
         },
         child: Text(
-          style: const TextStyle(color: Colors.white),
           buttonText,
         ));
   }

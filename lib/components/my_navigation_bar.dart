@@ -11,7 +11,7 @@ class MyNavigationBar extends StatelessWidget {
     return SizedBox(
       height: 55.0,
       child: BottomAppBar(
-        color: const Color.fromRGBO(58, 66, 86, 1.0),
+        color: Theme.of(context).colorScheme.secondary,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[

@@ -1,7 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:projeto_eventos/components/my_alert_dialog.dart';
 import 'package:projeto_eventos/components/my_button.dart';
 import 'package:projeto_eventos/components/my_multiline_text_field.dart';
@@ -106,8 +108,11 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: AppBar(
-        title: const Text('Register Page'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        title:
+            const Text('Register Page', style: TextStyle(color: Colors.white)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -141,20 +146,29 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(
                 height: 25,
               ),
-              DropdownButton<String>(
-                hint: const Text("Selecione uma função"),
-                value: dropdownValue,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    dropdownValue = newValue!;
-                  });
-                },
-                items: list.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+              const Text("Selecione o tipo de usuario.",
+                  style: TextStyle(color: Colors.white, fontSize: (20))),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                ),
+                child: DropdownButton<String>(
+                  hint: const Text("Selecione uma função",
+                      style: TextStyle(color: Colors.white, fontSize: (20))),
+                  value: dropdownValue,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dropdownValue = newValue!;
+                    });
+                  },
+                  items: list.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
               ),
               const SizedBox(
                 height: 50,

@@ -58,12 +58,6 @@ class _RewardsListPageState extends State<RewardsListPage> {
               itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
                 final reward = snapshot.data![index];
-                print('--------------------------------------------');
-                print(reward.id);
-                print(reward.name);
-                print(reward.description);
-                print(reward.sportEvents);
-                print('--------------------------------------------');
                 return GestureDetector(
                   child: ListTile(
                     title: Text(reward.name),

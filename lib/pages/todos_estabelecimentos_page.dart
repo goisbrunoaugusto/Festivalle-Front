@@ -44,7 +44,7 @@ class _TodosEstabelecimentosPageState extends State<TodosEstabelecimentosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         endDrawer: Drawer(
           backgroundColor: const Color.fromRGBO(58, 66, 86, .9),
           child: SafeArea(
@@ -115,7 +115,7 @@ class _TodosEstabelecimentosPageState extends State<TodosEstabelecimentosPage> {
         ),
         appBar: AppBar(
           centerTitle: true,
-          backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           title: const Center(
               child: Text(
             'Estabelecimentos',

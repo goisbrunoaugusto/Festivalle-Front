@@ -11,8 +11,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: const LoginPage(), routes: <String, WidgetBuilder>{
-      '/register': (BuildContext context) => const RegisterPage(),
-    });
+    return MaterialApp(
+      title: 'Tema Flutter',
+      theme: ThemeData(
+        buttonTheme: const ButtonThemeData(
+          buttonColor: Colors.amber,
+          textTheme: ButtonTextTheme.primary,
+        ),
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 55, 135, 100),
+            secondary: const Color.fromARGB(255, 41, 190, 140)),
+      ),
+      home: const LoginPage(),
+      routes: <String, WidgetBuilder>{
+        '/register': (BuildContext context) => const RegisterPage(),
+      },
+    );
   }
 }

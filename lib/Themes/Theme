@@ -1,0 +1,7 @@
+MaterialApp(title: 'Tema Flutter',
+    theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 55, 135, 100),
+                secondary: Colors.amber),
+      ),

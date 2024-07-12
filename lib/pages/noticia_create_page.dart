@@ -24,7 +24,7 @@ class _NoticiaCreationPageState extends State<NoticiaCreationPage> {
   final textController = TextEditingController();
   final dateController = TextEditingController();
 
-  Future<void> registerEventJson(String title, String text, String data, int id,
+  Future<void> createNews(String title, String text, String data, int id,
       BuildContext context) async {
     var url =
         Uri.parse("http://10.0.2.2:8080/noticias?eventoId=${widget.eventID}");
@@ -41,64 +41,30 @@ class _NoticiaCreationPageState extends State<NoticiaCreationPage> {
           "eventoId": id,
         }));
     if (response.statusCode == 201) {
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) {
-          return MyAlertDialog(
-            title: 'Sucesso!',
-            content: "Noticia de estabelecimento realizado com sucesso!",
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                HomePage(token: widget.token)));
-                  },
-                  child: const Text("Ok"))
-            ],
-          );
-        },
-      );
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Noticia publicada com sucesso!')));
     } else {
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) {
-          return MyAlertDialog(
-            title: 'Ops!',
-            content: "Somente organizadores podem registrar noticias.",
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Ok"))
-            ],
-          );
-        },
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Somente organizadores podem publicar noticias!')));
     }
   }
 
-  void registerEvent() {
-    registerEventJson(titleController.text, textController.text,
-        dateController.text, widget.eventID, context);
+  void registerNew() {
+    createNews(titleController.text, textController.text, dateController.text,
+        widget.eventID, context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: AppBar(
         centerTitle: true,
         leading: const BackButton(
           color: Colors.white,
         ),
         elevation: 0.1,
-        backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         actions: <Widget>[
           IconButton(
             icon: const Icon(
@@ -121,7 +87,7 @@ class _NoticiaCreationPageState extends State<NoticiaCreationPage> {
                   controller: titleController,
                 ),
                 MyDateField(
-                  hintText: 'Digite a data de começo do evento',
+                  hintText: 'Digite a hora da noticia',
                   controller: dateController,
                 ),
                 MyTextField(
@@ -129,7 +95,7 @@ class _NoticiaCreationPageState extends State<NoticiaCreationPage> {
                   obscuredText: false,
                   controller: textController,
                 ),
-                MyButton(buttonText: 'Register', buttonFunction: registerEvent),
+                MyButton(buttonText: 'Register', buttonFunction: registerNew),
               ],
             ),
           ),

@@ -9,8 +9,6 @@ import 'package:projeto_eventos/components/my_textfield.dart';
 import 'package:projeto_eventos/components/my_button.dart';
 import 'package:projeto_eventos/pages/home_page.dart';
 
-import '../model/user_request_model.dart';
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -59,19 +57,13 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: ListView(
             children: [
-              const Icon(
-                Icons.lock,
-                size: 100,
-                color: Colors.white,
-              ),
-              const SizedBox(
-                height: 50,
+              const Image(
+                image: AssetImage('lib/assets/images/FUNDO_BRANCO.png'),
               ),
               MyTextField(
                   hintText: 'Digite seu email',

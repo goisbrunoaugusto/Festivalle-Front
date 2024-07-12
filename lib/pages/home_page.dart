@@ -46,9 +46,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         endDrawer: Drawer(
-          backgroundColor: const Color.fromRGBO(58, 66, 86, .9),
+          backgroundColor: Theme.of(context).colorScheme.secondary,
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -118,12 +118,11 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
-          backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
-          title: const Center(
-              child: Text(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          title: const Text(
             'Eventos',
             style: TextStyle(color: Colors.white),
-          )),
+          ),
           actions: <Widget>[
             Builder(builder: (context) {
               return IconButton(

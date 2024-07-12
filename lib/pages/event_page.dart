@@ -3,17 +3,13 @@
 import "dart:convert";
 
 import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
-import "package:jwt_decoder/jwt_decoder.dart";
 import "package:projeto_eventos/components/my_alert_dialog.dart";
 import "package:projeto_eventos/components/my_navigation_bar.dart";
 import "package:projeto_eventos/components/my_button.dart";
 import "package:http/http.dart" as http;
-import "package:projeto_eventos/model/news_model.dart";
+import "package:projeto_eventos/dialogs/avaliacao_dialog.dart";
 import "package:projeto_eventos/pages/attraction_create_page.dart";
 import "package:projeto_eventos/pages/noticia_create_page.dart";
-import "package:projeto_eventos/pages/reward_creation_page.dart";
-import "package:projeto_eventos/pages/reward_list_page.dart";
 
 class EventPage extends StatefulWidget {
   final String token;
@@ -93,7 +89,6 @@ class _EventPageState extends State<EventPage> {
           'Authorization': "Bearer ${widget.token}",
         });
     if (response.statusCode == 200 && response.body.isNotEmpty) {
-      print(response.body);
       List<dynamic> responseJson = json.decode(response.body);
       setState(() {
         news = responseJson;
@@ -112,9 +107,9 @@ class _EventPageState extends State<EventPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+      backgroundColor: Theme.of(context).colorScheme.primary,
       endDrawer: Drawer(
-        backgroundColor: const Color.fromRGBO(58, 66, 86, .9),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -159,7 +154,7 @@ class _EventPageState extends State<EventPage> {
                         width: 15,
                       ),
                       Text(
-                        "Listar Recompensa",
+                        "Avaliar",
                         style: TextStyle(fontSize: 20, color: Colors.white),
                       )
                     ],
@@ -168,35 +163,10 @@ class _EventPageState extends State<EventPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            RewardsListPage(token: widget.token),
-                      ),
-                    );
-                  },
-                ),
-                GestureDetector(
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.add_box,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                      SizedBox(
-                        width: 15,
-                      ),
-                      Text(
-                        "Adicionar Atração",
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      )
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AttractionCreationPage(
-                            token: widget.token, eventID: widget.eventID),
+                        builder: (context) => AvaliacaoDialog(
+                            context: context,
+                            eventID: widget.eventID,
+                            token: widget.token),
                       ),
                     );
                   },
@@ -212,7 +182,7 @@ class _EventPageState extends State<EventPage> {
           color: Colors.white,
         ),
         elevation: 0.1,
-        backgroundColor: const Color.fromRGBO(58, 66, 86, 1.0),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         actions: <Widget>[
           Builder(builder: (context) {
             return IconButton(
@@ -256,7 +226,7 @@ class _EventPageState extends State<EventPage> {
                   width: 15,
                 ),
                 Text(
-                  "Data de inicio: ${widget.startDateTime}",
+                  "Data de inicio: ${widget.startDateTime.split(r'T')[0]}",
                   style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
               ],
@@ -278,7 +248,7 @@ class _EventPageState extends State<EventPage> {
                   width: 15,
                 ),
                 Text(
-                  "Data de fim: ${widget.endDateTime}",
+                  "Data de fim: ${widget.endDateTime.split(r'T')[0]}",
                   style: const TextStyle(fontSize: 14, color: Colors.white),
                 ),
               ],
@@ -320,56 +290,77 @@ class _EventPageState extends State<EventPage> {
               ],
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: news.length,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Row(
-                        children: [
-                          const SizedBox(
-                            width: 45,
-                          ),
-                          const Icon(
-                            Icons.article,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Text(
-                            news[index]["title"],
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 50,
-                      ),
-                      Row(
-                        children: [
-                          const SizedBox(
-                            width: 45,
-                          ),
-                          const Icon(
-                            Icons.article,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Text(
-                            news[index]["text"],
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.white),
-                          ),
-                        ],
-                      ),
+              child: Container(
+                margin: const EdgeInsets.only(right: 20, left: 20),
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 41, 190, 140),
+                      Color.fromARGB(255, 89, 170, 143),
                     ],
-                  );
-                },
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    child: ListView.builder(
+                      itemCount: news.length,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                const SizedBox(
+                                  width: 45,
+                                ),
+                                const Icon(
+                                  Icons.newspaper_rounded,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                Text(
+                                  news[index]["title"],
+                                  style: const TextStyle(
+                                      fontSize: 28, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const SizedBox(
+                                  width: 45,
+                                ),
+                                const SizedBox(
+                                  width: 40,
+                                ),
+                                Text(
+                                  news[index]["text"],
+                                  style: const TextStyle(
+                                      fontSize: 14, color: Colors.white),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 30,
+                            )
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
+            ),
+            const SizedBox(
+              height: 50,
             ),
             const Row(
               children: [
@@ -385,16 +376,38 @@ class _EventPageState extends State<EventPage> {
             const SizedBox(
               height: 15,
             ),
-            Row(
-              children: [
-                const SizedBox(
-                  width: 30,
+            Container(
+              margin: const EdgeInsets.only(right: 20, left: 20),
+              decoration: BoxDecoration(
+                border: Border.all(),
+                borderRadius: BorderRadius.circular(10),
+                gradient: const LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 41, 190, 140),
+                    Color.fromARGB(255, 89, 170, 143),
+                  ],
                 ),
-                Text(
-                  widget.description,
-                  style: const TextStyle(color: Colors.white),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 30,
+                      ),
+                      Text(
+                        widget.description,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
             const SizedBox(
               height: 30,
